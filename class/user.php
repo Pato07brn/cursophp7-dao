@@ -1,6 +1,6 @@
 <?php 
 
-class user{
+class User{
 
 	private $idusuario;
 	private $deslogin;
@@ -58,6 +58,57 @@ class user{
 
 		}
 	}
+
+
+
+	public static function getList(){
+		$sql = new Sql();
+		return $sql->select("SELECT * FROM tb_usuarios ORDER BY idusuario");
+	}
+
+
+
+	public static function Search($login){
+		$sql = new Sql();
+		return $sql->select("SELECT * FROM tb_usuarios WHERE deslogin LIKE :SEARCH ORDER BY deslogin", array(
+			":SEARCH"=>"%".$login."%",
+		));
+
+	}
+
+
+	public function InserirValor($nome, $senha){
+
+		$sql = new Sql();
+		$sql->select("INSERT INTO tb_usuarios (deslogin, dessenha) VALUES(:USUARIO, :SENHA)", array(
+			":USUARIO"=>$nome,
+			":SENHA"=>$senha,
+		));
+	}
+
+
+	public function Login($login, $pass){
+		$sql = new Sql();
+
+		$results = $sql->select("SELECT * FROM tb_usuarios WHERE deslogin = :LOGIN AND dessenha = :PASS", array(
+			":LOGIN"=>$login,
+			":PASS"=>$pass
+		));
+		if (count($results) > 0){
+			
+			$row = $results[0];
+
+			$this->setIdusuario($row['idusuario']);
+			$this->setDeslogin($row['deslogin']);
+			$this->setDessenha($row['dessenha']);
+			$this->setDtcadastro(new DateTime($row['dtcadastro']));
+		} else{
+			throw new Exception("Deu ruim abortar missão");
+			
+		}
+	}
+
+
 
 	public function __toString(){
 		return json_encode(array(
