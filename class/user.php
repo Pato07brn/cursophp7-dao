@@ -39,6 +39,13 @@ class User{
 		$this->dtcadastro = $value;
 	}
 
+	public function setData($data){	
+		$this->setIdusuario($data['idusuario']);
+		$this->setDeslogin($data['deslogin']);
+		$this->setDessenha($data['dessenha']);
+		$this->setDtcadastro(new DateTime($data['dtcadastro']));
+	}
+
 	public function loadById($id){
 
 		$sql = new Sql();
@@ -46,27 +53,16 @@ class User{
 		$results = $sql->select("SELECT * FROM tb_usuarios WHERE idusuario = :ID", array(
 			":ID"=>$id
 		));
-		if (count($results) > 0){
-			
-			$row = $results[0];
-
-			$this->setIdusuario($row['idusuario']);
-			$this->setDeslogin($row['deslogin']);
-			$this->setDessenha($row['dessenha']);
-			$this->setDtcadastro(new DateTime($row['dtcadastro']));
-
-
+		if (count($results) > 0){	
+			$this->setData($results[0]);
 		}
 	}
-
 
 
 	public static function getList(){
 		$sql = new Sql();
 		return $sql->select("SELECT * FROM tb_usuarios ORDER BY idusuario");
 	}
-
-
 
 	public static function Search($login){
 		$sql = new Sql();
@@ -76,17 +72,6 @@ class User{
 
 	}
 
-
-	public function InserirValor($nome, $senha){
-
-		$sql = new Sql();
-		$sql->select("INSERT INTO tb_usuarios (deslogin, dessenha) VALUES(:USUARIO, :SENHA)", array(
-			":USUARIO"=>$nome,
-			":SENHA"=>$senha,
-		));
-	}
-
-
 	public function Login($login, $pass){
 		$sql = new Sql();
 
@@ -95,13 +80,9 @@ class User{
 			":PASS"=>$pass
 		));
 		if (count($results) > 0){
+		
+			$this->setData($results[0]);
 			
-			$row = $results[0];
-
-			$this->setIdusuario($row['idusuario']);
-			$this->setDeslogin($row['deslogin']);
-			$this->setDessenha($row['dessenha']);
-			$this->setDtcadastro(new DateTime($row['dtcadastro']));
 		} else{
 			throw new Exception("Deu ruim abortar missão");
 			
@@ -109,6 +90,59 @@ class User{
 	}
 
 
+	public function Insert(){
+		$sql = new Sql();
+		
+		$results = $sql->select("CALL sp_usuarios_insert(:LOGIN, :PASS)", array(
+			":LOGIN"=>$this->getDeslogin(),
+			":PASS"=>$this->getDessenha()
+		));
+		if (count($results) > 0){
+			$this->setData($results[0]);
+		}
+	}
+
+	public function Update($login, $pass){
+		
+		$this->setDeslogin($login);
+		$this->setDessenha($pass);
+
+		$sql = new Sql();
+		
+		$sql->query("UPDATE tb_usuarios SET deslogin = :LOGIN , dessenha = :PASS WHERE idusuario = :ID", array(
+			":LOGIN"=>$this->getDeslogin(),
+			":PASS"=>$this->getDessenha(),
+			":ID"=>$this->getIdusuario()
+		));
+	}
+
+	public function Deleta(){
+		$sql = new Sql();
+
+		$sql->query("DELETE FROM tb_usuarios WHERE idusuario = :ID", array(
+			":ID"=>$this->getIdusuario()
+		));
+
+		$this->setIdusuario(0);
+		$this->setDeslogin("");
+		$this->setDessenha("");
+		$this->setDtcadastro(new DateTime());
+	}
+
+	public function __construct($login = "", $pass = ""){
+			$this->setDeslogin($login);
+			$this->setDessenha($pass);
+	}
+
+	//criei esse método
+	public function InserirValor($nome, $senha){
+
+			$sql = new Sql();
+			$sql->select("INSERT INTO tb_usuarios (deslogin, dessenha) VALUES(:USUARIO, :SENHA)", array(
+				":USUARIO"=>$nome,
+				":SENHA"=>$senha,
+			));
+	}
 
 	public function __toString(){
 		return json_encode(array(

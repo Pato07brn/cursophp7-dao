@@ -27,9 +27,26 @@
 	//echo json_encode($busca);
 
 	#valida login e senha
-	$valida = new User();
-	$valida->Login("Bruno", "123456");
+	//$valida = new User();
+	//$valida->Login("Bruno", "123456");
 
-	echo $valida;
+	#cadastra pelo professor
+	//$cadastro = new User("Rasiel", "474846");
+	//$cadastro->Insert();
+	//echo $cadastro;
+
+	#atualiza
+	//$atualiza = new User();
+	//$atualiza->loadById(4);
+	//$atualiza->Update("Rasiel", "160.568.3");
+	//echo $atualiza;
+
+	#deleta
+	$apaga = new User();
+	$apaga->loadById(2);
+	$apaga->Deleta();
+
+	echo $apaga;
+
 
  ?>
